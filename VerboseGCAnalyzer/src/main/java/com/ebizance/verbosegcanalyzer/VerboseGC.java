@@ -3,6 +3,8 @@ package com.ebizance.verbosegcanalyzer;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.Format;
+import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,50 +40,60 @@ public class VerboseGC {
     	int i=0;
 		while ((str = in.readLine()) != null) {
 			i++;
+			GC gc = null;
 						
 			try {
 				if (str.contains("ParNew:"))
 				{
-					GC gc = parseMinorGC(str);
-					gcs.add(gc);
+					gc = parseMinorGC(str);
 				} else if (str.contains("CMS-initial-mark:"))
 				{
-					GC gc = parseCMSInitialMark(str);
-					gcs.add(gc);
+					gc = parseCMSInitialMark(str);
 				} else if (str.contains("CMS-concurrent-mark:"))
 				{
-					GC gc = parseCMSConcurrentMark(str);
-					gcs.add(gc);
+					gc = parseCMSConcurrentMark(str);
 				} else if (str.contains("CMS-concurrent-preclean:"))
 				{
-					GC gc = parseCMSConcurrentPreclean(str);
-					gcs.add(gc);
+					gc = parseCMSConcurrentPreclean(str);
 				} else if (str.contains("CMS-concurrent-abortable-preclean:"))
 				{
-					GC gc = parseCMSConcurrentAbortablePreclean(str);
-					gcs.add(gc);
+					gc = parseCMSConcurrentAbortablePreclean(str);
 				} else if (str.contains("CMS-remark:"))
 				{
-					GC gc = parseCMSRemark(str);
-					gcs.add(gc);
+					gc = parseCMSRemark(str);
 				} else if (str.contains("CMS-concurrent-sweep:"))
 				{
-					GC gc = parseCMSConcurrentSweep(str);
-					gcs.add(gc);
+					gc = parseCMSConcurrentSweep(str);
 				} else if (str.contains("CMS-concurrent-reset:"))
 				{
-					GC gc = parseCMSConcurrentReset(str);
-					gcs.add(gc);
+					gc = parseCMSConcurrentReset(str);
 				}
 			}
 			catch(RuntimeException e)
 			{
 				System.out.println("Unable to parse line " + i);
 			}			
+						
+			boolean valid = false;
 			
+			if (gc!=null)
+			{
+				valid = true;
+				if (VerboseGCAnalyzerConfig.startDate_ != null &&
+						VerboseGCAnalyzerConfig.startDate_.after(gc.getDate())
+					)
+					valid= false;
+				if (VerboseGCAnalyzerConfig.endDate_ != null &&
+						VerboseGCAnalyzerConfig.endDate_.before(gc.getDate())
+					)
+					valid= false;	
+			}
+			
+			if (valid==true)
+				gcs.add(gc);
 		}	
 		
-		displayGC(gcs);		
+		displayGC(gcs);
     }
     
     private GC parseMinorGC(String str)
@@ -197,7 +209,7 @@ public class VerboseGC {
 	{
 		String[] tokens = str.split("[:]");
 		
-		String date = tokens[0] + ":" + tokens[1];
+		String date = tokens[0] + ":" + tokens[1] + ":" + tokens[2];
 		gc.setDate(date);
 		double time = Double.parseDouble(tokens[3]);
 		gc.setTime(time);
@@ -285,10 +297,10 @@ public class VerboseGC {
     		
     		youngSizeCollected += gc.getYoungSizeCollected();
     		totalSizeCollected += gc.getTotalSizeCollected();
-    		promotedSize += gc.getPromotedSize();
+    		promotedSize += gc.getPromotedSize(); 		
     		
     		String line=
-    			gc.getDate() + "," +
+    			VerboseGCAnalyzerConfig.exportDateFormat_.format(gc.getDate()) + "," +
     			gc.getTime() + "," +
     			gc.getDisplayType() + "," +
     			gc.getCpuReal() + "," +				

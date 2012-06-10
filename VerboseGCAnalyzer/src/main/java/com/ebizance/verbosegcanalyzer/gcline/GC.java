@@ -1,5 +1,11 @@
 package com.ebizance.verbosegcanalyzer.gcline;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import com.ebizance.verbosegcanalyzer.VerboseGCAnalyzerConfig;
+
 /**
  * 
  * @author Yannick Robin
@@ -71,8 +77,15 @@ public class GC {
 		this.type = type;
 	}
 	
-	public String getDate() {
-		return date;
+	public Date getDate() {		
+		SimpleDateFormat dateFormat = VerboseGCAnalyzerConfig.dateFormat_;
+	    Date convertedDate = null;
+		try {
+			convertedDate = dateFormat.parse(date);
+		} catch (ParseException e) {
+			new Throwable("Incorrect date format"); 
+		}
+	    return convertedDate;
 	}
 	
 	public void setDate(String date) {
