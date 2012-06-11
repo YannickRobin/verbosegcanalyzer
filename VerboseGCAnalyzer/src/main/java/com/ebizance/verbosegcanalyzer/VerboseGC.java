@@ -9,6 +9,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.ebizance.verbosegcanalyzer.export.CSVExport;
+import com.ebizance.verbosegcanalyzer.export.HTMLExport;
+import com.ebizance.verbosegcanalyzer.export.SumUpReport;
 import com.ebizance.verbosegcanalyzer.gcline.GC;
 
 /**
@@ -35,13 +38,23 @@ public class VerboseGC {
     public void parse() throws IOException
     {	
     	System.out.println("*** Start parsing ***");
+    	  
+    	SumUpReport sumUpReport = new SumUpReport();
+    	
+    	HTMLExport htmlExport = null;
+    	if (VerboseGCAnalyzerConfig.exportHTMLReport_)
+    		htmlExport = new HTMLExport();
+    	
+    	CSVExport csvExport = null;
+    	if (VerboseGCAnalyzerConfig.exportCSV_)
+    		csvExport = new CSVExport();
+    	   	
     	String str;
-    	List<GC> gcs = new LinkedList<GC>();
     	int i=0;
 		while ((str = in.readLine()) != null) {
+			
 			i++;
-			GC gc = null;
-						
+			GC gc = null;						
 			try {
 				if (str.contains("ParNew:"))
 				{
@@ -90,10 +103,20 @@ public class VerboseGC {
 			}
 			
 			if (valid==true)
-				gcs.add(gc);
+			{
+				sumUpReport.exportGCLine(gc);
+				if (VerboseGCAnalyzerConfig.exportHTMLReport_)
+					htmlExport.exportGCLine(gc);
+				if (VerboseGCAnalyzerConfig.exportCSV_)
+					csvExport.exportGCLine(gc);		
+			}
 		}	
 		
-		displayGC(gcs);
+		sumUpReport.display();
+		if (VerboseGCAnalyzerConfig.exportHTMLReport_)
+			htmlExport.generateChart();
+		if (VerboseGCAnalyzerConfig.exportCSV_)
+			csvExport.close();		
     }
     
     private GC parseMinorGC(String str)
@@ -233,112 +256,6 @@ public class VerboseGC {
 		{
 			System.out.println(i + ":" + tokens[i]);
 		}
-    }
-    	
-	private void displayGC(List<GC> gcs)
-    {
-    	System.out.println("*** display GC ***");
-    	
-    	double startTime = 0;
-    	double endTime = 0;
-    	
-    	int youngSizeCollected = 0;
-    	int totalSizeCollected = 0;
-    	int promotedSize = 0;
-    	double cpuMinorGCReal = 0;
-    	double cpuMinorGCUser = 0;
-    	double cpuMinorGCSystem = 0;
-    	double cpuMajorGCReal = 0;
-    	double cpuMajorGCUser = 0;
-    	double cpuMajorGCSystem = 0;
-    	
-    	String header =
-	    	"date," +
-			"time," +
-			"type," +
-			"cpuReal," +				
-			"cpuUser," +
-			"cpuSystem," +
-			"collectionPauseTime," +
-			"youngSizeBefore," +
-			"youngSizeAfter," +
-			"youngSizeMax," +
-			"totalSizeBefore," +
-			"totalSizeAfter," +
-			"totalSizeMax," +
-			"youngSizeCollected," +
-			"totalSizeCollected," +
-			"promotedSize," +
-			"tenuredSizeBefore," +
-			"tenuredSizeAfter";
-    	
-    	System.out.println(header);
-    	
-    	for (Iterator <GC> it=gcs.iterator(); it.hasNext();)
-    	{
-    		GC gc = (GC) it.next();
-    		
-    		if (startTime==0)
-    			startTime = gc.getTime();
-    		
-    		endTime = gc.getTime();
-    		
-    		if (gc.getType()==GC.PAR_NEW)
-    		{
-	    		cpuMinorGCReal += gc.getCpuReal();
-	    		cpuMinorGCUser += gc.getCpuUser();
-	    		cpuMinorGCSystem += gc.getCpuSystem();
-    		} else
-    		{
-	    		cpuMajorGCReal += gc.getCpuReal();
-	    		cpuMajorGCUser += gc.getCpuUser();
-	    		cpuMajorGCSystem += gc.getCpuSystem();
-    		}	
-    		
-    		youngSizeCollected += gc.getYoungSizeCollected();
-    		totalSizeCollected += gc.getTotalSizeCollected();
-    		promotedSize += gc.getPromotedSize(); 		
-    		
-    		String line=
-    			VerboseGCAnalyzerConfig.exportDateFormat_.format(gc.getDate()) + "," +
-    			gc.getTime() + "," +
-    			gc.getDisplayType() + "," +
-    			gc.getCpuReal() + "," +				
-    			gc.getCpuUser() + "," +
-    			gc.getCpuSystem() + "," +
-    			gc.getCollectionPauseTime() + "," +
-    			gc.getYoungSizeBefore() + "," +
-    			gc.getYoungSizeAfter() + "," +
-    			gc.getYoungSizeMax() + "," +
-    			gc.getTotalSizeBefore() + "," +
-    			gc.getTotalSizeAfter() + "," +
-    			gc.getTotalSizeMax() + "," +
-    			gc.getYoungSizeCollected() + "," +
-    			gc.getTotalSizeCollected() + "," +
-    			gc.getPromotedSize() + "," +
-    			gc.getTenuredSizeBefore() + "," +
-    			gc.getTenuredSizeAfter();
-    		
-    		boolean dislayMajorGC = false;
-    		
-    		if (gc.getType() == GC.PAR_NEW || VerboseGCAnalyzerConfig.dislayMajorGC_)
-    			System.out.println(line);
-    	}
-    	
-    	double totalTime = endTime-startTime;
-    	
-    	System.out.println("\nTotal time: " + Math.round(totalTime*100/60)/100d + " min");
-    	System.out.println("Young size collected: " + youngSizeCollected/1024/1024 + " GB");
-    	System.out.println("Young size collected: " + Math.round((youngSizeCollected/1024)*1000/totalTime)/1000d + " MB/s");
-    	System.out.println("Total size collected by minor GC: " + totalSizeCollected/1024/1024 + " GB");
-    	System.out.println("Total size collected by minor GC: " + Math.round((totalSizeCollected/1024)*1000/totalTime)/1000d + " MB/s");
-    	System.out.println("Promoted size: " + promotedSize/1024/1024 + " GB");
-    	System.out.println("Promoted size: " + Math.round((promotedSize/1024)*1000/totalTime)/1000d + " MB/s");
-    	System.out.println("Cpu Minor GC real: " + Math.round(10000*cpuMinorGCReal/totalTime)/100d + "%");
-    	System.out.println("Cpu Major GC total processors: " + Math.round(10000*(cpuMinorGCUser+cpuMinorGCSystem)/totalTime)/100d + "%");
-    	System.out.println("Cpu Major GC real: " + Math.round(10000*cpuMajorGCReal/totalTime)/100d + "%");
-    	System.out.println("Cpu Major GC total processors: " + Math.round(10000*(cpuMajorGCUser+cpuMajorGCSystem)/totalTime)/100d + "%");
-
     }
 
 }
