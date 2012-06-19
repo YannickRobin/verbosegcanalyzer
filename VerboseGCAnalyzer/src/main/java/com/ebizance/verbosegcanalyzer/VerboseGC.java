@@ -9,6 +9,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jfree.data.general.SeriesException;
+
 import com.ebizance.verbosegcanalyzer.export.CSVExport;
 import com.ebizance.verbosegcanalyzer.export.HTMLExport;
 import com.ebizance.verbosegcanalyzer.export.SumUpReport;
@@ -52,7 +54,6 @@ public class VerboseGC {
     	String str;
     	int i=0;
 		while ((str = in.readLine()) != null) {
-			
 			i++;
 			GC gc = null;						
 			try {
@@ -104,11 +105,16 @@ public class VerboseGC {
 			
 			if (valid==true)
 			{
-				sumUpReport.exportGCLine(gc);
-				if (VerboseGCAnalyzerConfig.exportHTMLReport_)
-					htmlExport.exportGCLine(gc);
-				if (VerboseGCAnalyzerConfig.exportCSV_)
-					csvExport.exportGCLine(gc);		
+				try {
+					sumUpReport.exportGCLine(gc);
+					if (VerboseGCAnalyzerConfig.exportHTMLReport_)
+						htmlExport.exportGCLine(gc);
+					if (VerboseGCAnalyzerConfig.exportCSV_)
+						csvExport.exportGCLine(gc);				
+				} catch (Exception e)
+				{
+					System.err.println("Unable to export line " + i);
+				}
 			}
 		}	
 		

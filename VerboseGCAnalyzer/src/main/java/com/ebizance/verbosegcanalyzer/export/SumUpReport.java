@@ -1,7 +1,5 @@
 package com.ebizance.verbosegcanalyzer.export;
 
-import java.util.Date;
-
 import com.ebizance.verbosegcanalyzer.gcline.GC;
 
 public class SumUpReport {
@@ -9,9 +7,9 @@ public class SumUpReport {
 	double startTime = 0;
 	double endTime = 0;
 	
-	int youngSizeCollected = 0;
-	int totalSizeCollected = 0;
-	int promotedSize = 0;
+	long youngSizeCollected = 0;
+	long totalSizeCollected = 0;
+	long promotedSize = 0;
 	double cpuMinorGCReal = 0;
 	double cpuMinorGCUser = 0;
 	double cpuMinorGCSystem = 0;
@@ -44,8 +42,11 @@ public class SumUpReport {
 		}	
 		
 		youngSizeCollected += gc.getYoungSizeCollected();
+
 		totalSizeCollected += gc.getTotalSizeCollected();
 		promotedSize += gc.getPromotedSize();
+		
+
 	}
 	
 	public void display()

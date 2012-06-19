@@ -12,6 +12,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.data.general.SeriesException;
 import org.jfree.data.time.FixedMillisecond;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
@@ -51,7 +52,7 @@ public class HTMLExport {
 		}
 		
 		seriesCpuReal.add(new FixedMillisecond(gc.getDate().getTime()),gc.getCpuReal());
-		
+
 	}
 	
 	public void generateChart()
