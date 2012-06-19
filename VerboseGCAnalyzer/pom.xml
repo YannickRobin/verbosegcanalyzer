@@ -3,7 +3,7 @@
 
   <groupId>com.ebizance.verbosegcanalyzer</groupId>
   <artifactId>VerboseGCAnalyzer</artifactId>
-  <version>1.3</version>
+  <version>1.4-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>VerboseGCAnalyzer</name>
@@ -20,9 +20,9 @@
   	</developer>
   </developers>
   <scm>
-    <connection>scm:svn:https://verbosegcanalyzer.googlecode.com/svn/tags/VerboseGCAnalyzer-1.3</connection>
-    <developerConnection>scm:svn:https://verbosegcanalyzer.googlecode.com/svn/tags/VerboseGCAnalyzer-1.3</developerConnection>
-    <url>http://code.google.com/p/verbosegcanalyzer/source/browse/tags/VerboseGCAnalyzer-1.3</url>
+    <connection>scm:svn:https://verbosegcanalyzer.googlecode.com/svn/trunk/VerboseGCAnalyzer</connection>
+    <developerConnection>scm:svn:https://verbosegcanalyzer.googlecode.com/svn/trunk/VerboseGCAnalyzer</developerConnection>
+    <url>http://code.google.com/p/verbosegcanalyzer/source/browse/</url>
   </scm>
   
   <repositories>
