@@ -1,3 +1,5 @@
+_Warning_: `Verbose GC Analyzer` is quite old. It has been tested with Java 1.6 and needs to be updated to work with more recents JDKs.
+
 #Introduction
 
 `Verbose GC Analyzer` is a tool to generate a CSV export and a sum-up report of Java GC logs.
